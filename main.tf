@@ -33,15 +33,15 @@ data "google_compute_address" "default" {
   count   = "${var.ip_address_name == "" ? 0 : 1}"
   name    = "${var.ip_address_name}"
   project = "${var.network_project == "" ? var.project : var.network_project}"
-  region  = "${var.region}"
+  location  = "${var.location}"
 }
 
 locals {
-  zone          = "${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"
+  zone          = "${var.zone == "" ? lookup(var.region_params["${var.location}"], "zone") : var.zone}"
   name          = "${var.name}nat-gateway-${local.zone}"
   instance_tags = ["inst-${local.zonal_tag}", "inst-${local.regional_tag}"]
   zonal_tag     = "${var.name}nat-${local.zone}"
-  regional_tag  = "${var.name}nat-${var.region}"
+  regional_tag  = "${var.name}nat-${var.location}"
 }
 
 module "nat-gateway" {
@@ -49,7 +49,7 @@ module "nat-gateway" {
   version               = "1.1.15"
   module_enabled        = "${var.module_enabled}"
   project               = "${var.project}"
-  region                = "${var.region}"
+  location              = "${var.location}"
   zone                  = "${local.zone}"
   network               = "${var.network}"
   subnetwork            = "${var.subnetwork}"
@@ -120,5 +120,5 @@ resource "google_compute_address" "default" {
   count   = "${var.module_enabled && var.ip_address_name == "" ? 1 : 0}"
   name    = "${local.zonal_tag}"
   project = "${var.project}"
-  region  = "${var.region}"
+  region  = "${var.location}"
 }

@@ -39,8 +39,8 @@ variable subnetwork {
   default     = "default"
 }
 
-variable region {
-  description = "The region to create the nat gateway instance in."
+variable location {
+  description = "The location to create the nat gateway instance in."
 }
 
 variable zone {
