@@ -33,23 +33,23 @@ data "google_compute_address" "default" {
   count   = "${var.ip_address_name == "" ? 0 : 1}"
   name    = "${var.ip_address_name}"
   project = "${var.network_project == "" ? var.project : var.network_project}"
-  region  = "${var.region}"
+  location  = "${var.location}"
 }
 
 locals {
-  zone          = "${var.zone == "" ? lookup(var.region_params["${var.region}"], "zone") : var.zone}"
+  zone          = "${var.zone == "" ? lookup(var.region_params["${var.location}"], "zone") : var.zone}"
   name          = "${var.name}nat-gateway-${local.zone}"
   instance_tags = ["inst-${local.zonal_tag}", "inst-${local.regional_tag}"]
   zonal_tag     = "${var.name}nat-${local.zone}"
-  regional_tag  = "${var.name}nat-${var.region}"
+  regional_tag  = "${var.name}nat-${var.location}"
 }
 
 module "nat-gateway" {
-  source                = "GoogleCloudPlatform/managed-instance-group/google"
-  version               = "1.1.15"
+  source                = "git::ssh://git@github.com/netMedi/terraform-google-managed-instance-group.git"
+  version               = "1.2"
   module_enabled        = "${var.module_enabled}"
   project               = "${var.project}"
-  region                = "${var.region}"
+  location              = "${var.location}"
   zone                  = "${local.zone}"
   network               = "${var.network}"
   subnetwork            = "${var.subnetwork}"
@@ -70,18 +70,6 @@ module "nat-gateway" {
   ssh_fw_rule           = "${var.ssh_fw_rule}"
   ssh_source_ranges     = "${var.ssh_source_ranges}"
   http_health_check     = "${var.autohealing_enabled}"
-
-  update_strategy = "ROLLING_UPDATE"
-
-  rolling_update_policy = [
-    {
-      type                  = "PROACTIVE"
-      minimal_action        = "REPLACE"
-      max_surge_fixed       = 0
-      max_unavailable_fixed = 1
-      min_ready_sec         = 30
-    },
-  ]
 
   access_config = [
     {
@@ -120,5 +108,5 @@ resource "google_compute_address" "default" {
   count   = "${var.module_enabled && var.ip_address_name == "" ? 1 : 0}"
   name    = "${local.zonal_tag}"
   project = "${var.project}"
-  region  = "${var.region}"
+  region  = "${var.location}"
 }
