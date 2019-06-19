@@ -71,7 +71,7 @@ variable route_priority {
 
 variable machine_type {
   description = "The machine type for the NAT gateway instance"
-  default     = "n1-standard-1"
+  default     = "g1-small"
 }
 
 variable compute_image {
